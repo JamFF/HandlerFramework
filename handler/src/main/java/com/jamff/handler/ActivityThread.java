@@ -39,6 +39,15 @@ public class ActivityThread {
                 @Override
                 public void run() {
 
+                    // post方式
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println(TAG + Thread.currentThread() + " handler.post");
+                        }
+                    });
+
+                    // sendEmptyMessage方式
                     handler.sendEmptyMessage(HANDLER_EMPTY_WHAT);
 
                     while (true) {
@@ -48,6 +57,7 @@ public class ActivityThread {
                             msg.obj = UUID.randomUUID().toString();
                         }
                         msg.what = HANDLER_WHAT;
+                        // sendMessage方式
                         handler.sendMessage(msg);
                         System.out.println(TAG + Thread.currentThread() + " msg.obj = " + msg.obj);
 

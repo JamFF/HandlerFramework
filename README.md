@@ -5,6 +5,8 @@ Handler源码分析及手写实现
 
 ##### Handler源码
 
+将Message发送给MessageQueue。
+
 1. 所有的sendMessage最终都会调用到sendMessageAtTime
 
     ```java
@@ -57,8 +59,23 @@ Handler源码分析及手写实现
         mAsynchronous = async;
     }
     ```
+    
+4. 如果是post，只不过是内部封装了一个Message
+    ```java
+    public final boolean post(Runnable r) {
+       return  sendMessageDelayed(getPostMessage(r), 0);
+    }
+ 
+    private static Message getPostMessage(Runnable r) {
+        Message m = Message.obtain();
+        m.callback = r;
+        return m;
+    }
+    ```
 
 ##### Looper源码
+
+一个线程只能创建一个Looper，通过`Looper.prepare()`，多次调用会报错*Only one Looper may be created per thread*。
 
 1. 在Looper构造方法中创建了mQueue
 
@@ -105,7 +122,10 @@ Handler源码分析及手写实现
 
 ##### ActivityThread源码
 
-prepare是在ActivityThread中main中调用的
+主线程的`Looper.prepare()`和`Looper.loop()`是在ActivityThread中main中调用的，所以可以`new Handler()`
+
+但是在子线程中没有Looper，`new Handler()`会报错*Can't create handler inside thread that has not called Looper.prepare()*
+
 ```java
 public static void main(String[] args) {
     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
@@ -130,7 +150,7 @@ public static void main(String[] args) {
     // 为主线程创建Looper
     Looper.prepareMainLooper();
 
-    // 实例化ActivityThread
+    // 实例化ActivityThread，也就是创建主线程
     ActivityThread thread = new ActivityThread();
     thread.attach(false);
 
@@ -155,7 +175,10 @@ public static void main(String[] args) {
 
 ##### Looper源码
 
-1. ActivityThread调用了Looper.prepareMainLooper();
+在`Looper.prepare()`之前调用`Looper.loop()`会报错，*No Looper; Looper.prepare() wasn't called on this thread*。
+`Looper.loop()`不断轮询MessageQueue，取出Message分发给Handler，注意`Looper.loop()`之后的代码不会执行，会阻塞，调用`quit()`才会结束轮询
+
+1. ActivityThread调用了Looper.prepareMainLooper()
 
     ```java
     /**
@@ -176,7 +199,7 @@ public static void main(String[] args) {
     }
     ```
 
-2. ActivityThread调用了Looper.loop();
+2. ActivityThread调用了Looper.loop()
 
     ```java
     /**
@@ -197,7 +220,7 @@ public static void main(String[] args) {
     
         for (;;) {
             // 出队
-            Message msg = queue.next(); // might block
+            Message msg = queue.next(); // might block,当没有msg时会阻塞，不会执行到下面的代码，不会return
             if (msg == null) {
                 // No message indicates that the message queue is quitting.
                 return;
@@ -251,6 +274,7 @@ public static void main(String[] args) {
                         + msg.callback + " what=" + msg.what);
             }
     
+            // 释放Message资源
             msg.recycleUnchecked();
         }
     }
@@ -270,6 +294,8 @@ public static void main(String[] args) {
 
 ##### Handler源码
 
+将Message发送给MessageQueue。
+
 1. 分发消息，两种方式，一种是post传入的Runnable，一种是sendMessage
 
     ```java
@@ -278,6 +304,7 @@ public static void main(String[] args) {
      */
     public void dispatchMessage(Message msg) {
         if (msg.callback != null) {
+            // Handler.post时会执行这里
             handleCallback(msg);
         } else {
             if (mCallback != null) {
@@ -302,6 +329,8 @@ public static void main(String[] args) {
     ```
 
 ##### MessageQueue源码
+
+由Looper管理，采用单向链表管理Message。
 
 1. 清楚了Looper，再回到queue.enqueueMessage(msg, uptimeMillis)，入队
 

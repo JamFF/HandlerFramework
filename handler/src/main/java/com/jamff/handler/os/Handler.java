@@ -38,6 +38,9 @@ public class Handler {
         return sendMessageDelayed(msg);
     }
 
+    public final boolean post(Runnable r) {
+        return sendMessageDelayed(getPostMessage(r));
+    }
 
     public final boolean sendMessageDelayed(Message msg) {
         return sendMessageAtTime(msg);
@@ -75,6 +78,22 @@ public class Handler {
      * 分发消息
      */
     public void dispatchMessage(Message msg) {
-        handleMessage(msg);
+        if (msg.callback != null) {
+            // post方式
+            handleCallback(msg);
+        } else {
+            // sendMessage方式
+            handleMessage(msg);
+        }
+    }
+
+    private static Message getPostMessage(Runnable r) {
+        Message m = new Message();
+        m.callback = r;
+        return m;
+    }
+
+    private static void handleCallback(Message message) {
+        message.callback.run();
     }
 }
