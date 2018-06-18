@@ -33,20 +33,33 @@ public class ActivityThread {
             }
         };
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 10; i++) {
-                    Message msg = new Message();
-                    msg.obj = UUID.randomUUID().toString();
-                    msg.what = HANDLER_WHAT;
-                    handler.sendMessage(msg);
-                    System.out.println(TAG + Thread.currentThread() + " msg.obj = " + msg.obj);
-                }
+        for (int i = 0; i < 10; i++) {
+            // 开启10个线程
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
 
-                handler.sendEmptyMessage(HANDLER_EMPTY_WHAT);
-            }
-        }).start();
+                    handler.sendEmptyMessage(HANDLER_EMPTY_WHAT);
+
+                    while (true) {
+                        Message msg = new Message();
+                        synchronized (UUID.class) {
+                            // randomUUID静态方法，加锁保证线程安全
+                            msg.obj = UUID.randomUUID().toString();
+                        }
+                        msg.what = HANDLER_WHAT;
+                        handler.sendMessage(msg);
+                        System.out.println(TAG + Thread.currentThread() + " msg.obj = " + msg.obj);
+
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+        }
 
         // 开启轮询
         Looper.loop();

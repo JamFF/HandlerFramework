@@ -88,7 +88,7 @@ Handler源码分析及手写实现
     static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
     ```
     
-4. *ThreadLocal*内部有一个Map (内部类ThreadLocalMap)，key是线程ID，value是传入的对象
+4. *ThreadLocal*内部有一个Map (内部类ThreadLocalMap)，key是线程ID，value是传入的对象的副本，使用在Java多线程编程，保证数据的隔离
 
 5. 找到sThreadLocal赋值的地方
 
@@ -100,6 +100,8 @@ Handler源码分析及手写实现
         sThreadLocal.set(new Looper(quitAllowed));
     }
     ```
+    
+![ThreadLocal](https://github.com/JamFF/HandlerFramework/blob/master/art/ThreadLocal.png)
 
 ###### ActivityThread源码
 
@@ -483,7 +485,7 @@ public static void main(String[] args) {
 
 #### 整理思路
 
-![alt text](https://github.com/JamFF/HandlerFramework/blob/master/art/handler.png)
+![handler](https://github.com/JamFF/HandlerFramework/blob/master/art/handler.png)
 
 1. 首先是在程序启动时调用了ActivityThread的main方法
 2. main方法通过Looper.prepareMainLooper()，调用prepare(boolean quitAllowed)创建了Looper实例
@@ -493,4 +495,4 @@ public static void main(String[] args) {
 6. 在Looper.myLooper()中返回了sThreadLocal的Looper副本
 7. 创建Handler时，取到了Looper副本mLooper，以及mQueue
 8. 调用Handler.sendMessage时，调用了MessageQueue的enqueueMessage，将Message加入队列
-9. Looper.loop()中不断轮询，通过Handler的dispatchMessage分发消息
+9. Looper.loop()中不断轮询，调用MessageQueue的next出队，通过Handler的dispatchMessage分发消息

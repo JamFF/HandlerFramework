@@ -59,8 +59,8 @@ public class MessageQueue {
             mCount++;
             // 队列不再为空，有产品可以消费
             notEmpty.signalAll();// 全部唤醒消费者
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } finally {
             mLock.unlock();
         }
