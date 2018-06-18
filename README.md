@@ -1,9 +1,9 @@
 # HandlerFramework
 Handler源码分析及手写实现
 
-#### 源码分析
+### 源码分析
 
-###### Handler源码
+##### Handler源码
 
 1. 所有的sendMessage最终都会调用到sendMessageAtTime
 
@@ -58,7 +58,7 @@ Handler源码分析及手写实现
     }
     ```
 
-###### Looper源码
+##### Looper源码
 
 1. 在Looper构造方法中创建了mQueue
 
@@ -103,7 +103,7 @@ Handler源码分析及手写实现
     
 ![ThreadLocal](https://github.com/JamFF/HandlerFramework/blob/master/art/ThreadLocal.png)
 
-###### ActivityThread源码
+##### ActivityThread源码
 
 prepare是在ActivityThread中main中调用的
 ```java
@@ -153,7 +153,7 @@ public static void main(String[] args) {
 }
 ```
 
-###### Looper源码
+##### Looper源码
 
 1. ActivityThread调用了Looper.prepareMainLooper();
 
@@ -268,7 +268,7 @@ public static void main(String[] args) {
     msg.target.dispatchMessage(msg);
     ```
 
-###### Handler源码
+##### Handler源码
 
 1. 分发消息，两种方式，一种是post传入的Runnable，一种是sendMessage
 
@@ -301,7 +301,7 @@ public static void main(String[] args) {
     }
     ```
 
-###### MessageQueue源码
+##### MessageQueue源码
 
 1. 清楚了Looper，再回到queue.enqueueMessage(msg, uptimeMillis)，入队
 
@@ -483,7 +483,7 @@ public static void main(String[] args) {
     }
     ```
 
-#### 整理思路
+### 整理思路
 
 ![handler](https://github.com/JamFF/HandlerFramework/blob/master/art/handler.png)
 
