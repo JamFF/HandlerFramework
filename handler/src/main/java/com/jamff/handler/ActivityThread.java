@@ -19,6 +19,7 @@ public class ActivityThread {
 
     public static void main(String[] args) {
 
+        // 创建全局唯一的、主线程Looper对象，以及MessageQueue消息队列
         Looper.prepare();
 
         final Handler handler = new Handler() {
@@ -71,7 +72,7 @@ public class ActivityThread {
             }).start();
         }
 
-        // 开启轮询
+        // 开启轮询，取出消息
         Looper.loop();
     }
 }

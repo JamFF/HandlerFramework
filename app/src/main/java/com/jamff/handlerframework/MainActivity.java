@@ -19,6 +19,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // 推荐使用接口的方式
+    private Handler mHandler2 = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            // 这里不论返回true或false，都是一样的效果，通过源码得出结论，建议返回true
+            return true;
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

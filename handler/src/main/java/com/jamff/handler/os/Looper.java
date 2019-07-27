@@ -15,6 +15,7 @@ public class Looper {
     final MessageQueue mQueue;
 
     private Looper() {
+        // 在实例化Looper的时候也创建主线程唯一MessageQueue
         mQueue = new MessageQueue();
     }
 
@@ -27,6 +28,7 @@ public class Looper {
      */
     public static void prepare() {
         if (sThreadLocal.get() != null) {
+            // 主线程只能有唯一一个Looper对象，在ActivityThread中进行创建，如果开发者在主线程中调用会抛出异常
             throw new RuntimeException("Only one Looper may be created per thread");
         }
         sThreadLocal.set(new Looper());
@@ -41,6 +43,7 @@ public class Looper {
             // loop调用之前需要调用prepare创建Looper
             throw new RuntimeException("No Looper; Looper.prepare() wasn't called on this thread.");
         }
+        // 从Looper中获取主线程唯一MessageQueue对象
         final MessageQueue queue = me.mQueue;
 
         for (; ; ) {

@@ -62,7 +62,8 @@ public class Handler {
      * 消息入队
      */
     private boolean enqueueMessage(MessageQueue queue, Message msg) {
-        // 注意，将handler赋值为target，让msg中持有Handler，方便在Looper.loop()中通过msg调用Handler.dispatchMessage分发的消息
+        // 注意，将handler赋值为target，让msg中持有Handler
+        // 目的是在Looper.loop()中通过msg调用Handler.dispatchMessage分发的消息
         msg.target = this;
         return queue.enqueueMessage(msg);
     }

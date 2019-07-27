@@ -26,7 +26,8 @@ Handler源码分析及手写实现
 
     ```java
     private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
-        // 注意，将handler赋值为target，让msg中持有Handler，方便在Looper.loop()中通过msg调用Handler.dispatchMessage分发的消息
+        // 注意，将handler赋值为target，让msg中持有Handler
+        // 目的是在Looper.loop()中通过msg调用Handler.dispatchMessage分发的消息
         msg.target = this;
         if (mAsynchronous) {
             msg.setAsynchronous(true);
@@ -211,6 +212,7 @@ public static void main(String[] args) {
         if (me == null) {
             throw new RuntimeException("No Looper; Looper.prepare() wasn't called on this thread.");
         }
+        // 从Looper中获取主线程唯一MessageQueue对象
         final MessageQueue queue = me.mQueue;
     
         // Make sure the identity of this thread is that of the local process,
@@ -308,10 +310,12 @@ public static void main(String[] args) {
             handleCallback(msg);
         } else {
             if (mCallback != null) {
+                // 使用Handler.Callback接口方式
                 if (mCallback.handleMessage(msg)) {
                     return;
                 }
             }
+            // 
             handleMessage(msg);
         }
     }
